@@ -38,7 +38,7 @@ public class PdfConverter implements Runnable {
     private PrintAttributes mPdfPrintAttrs;
     private boolean mIsCurrentlyConverting;
     private WebView mWebView;
-    private boolean mShouldEncode;
+    private PdfOptions mOptions;
     private WritableMap mResultMap;
     private Promise mPromise;
 
@@ -69,7 +69,7 @@ public class PdfConverter implements Runnable {
                         public void onWriteFinished(PageRange[] pages) {
                             try {
                                 String base64 = "";
-                                if (mShouldEncode) {
+                                if (mOptions.getShouldEncode()) {
                                     base64 = encodeFromFile(mPdfFile);
                                 }
                                 mResultMap.putString("filePath", mPdfFile.getAbsolutePath());
@@ -96,7 +96,7 @@ public class PdfConverter implements Runnable {
         this.mPdfPrintAttrs = printAttrs;
     }
 
-    public void convert(Context context, String htmlString, File file, boolean shouldEncode, WritableMap resultMap, Promise promise) {
+    public void convert(Context context, String htmlString, File file, PdfOptions options, WritableMap resultMap, Promise promise) {
         if (context == null)
             throw new IllegalArgumentException("context can't be null");
         if (htmlString == null)
@@ -111,7 +111,8 @@ public class PdfConverter implements Runnable {
         mHtmlString = htmlString;
         mPdfFile = file;
         mIsCurrentlyConverting = true;
-        mShouldEncode = shouldEncode;
+        // mShouldEncode = shouldEncode;
+        mOptions = options;
         mResultMap = resultMap;
         mPromise = promise;
         runOnUiThread(this);
@@ -131,7 +132,7 @@ public class PdfConverter implements Runnable {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return null;
 
         return new PrintAttributes.Builder()
-                .setMediaSize(PrintAttributes.MediaSize.NA_GOVT_LETTER)
+                .setMediaSize(mOptions.getMediaSize())
                 .setResolution(new PrintAttributes.Resolution("RESOLUTION_ID", "RESOLUTION_ID", 600, 600))
                 .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
                 .build();
@@ -150,7 +151,7 @@ public class PdfConverter implements Runnable {
         mPdfPrintAttrs = null;
         mIsCurrentlyConverting = false;
         mWebView = null;
-        mShouldEncode = false;
+        mOptions = null;
         mResultMap = null;
         mPromise = null;
     }

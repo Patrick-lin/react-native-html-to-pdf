@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import android.os.Environment;
 import android.print.PdfConverter;
+import android.print.PdfOptions;
 
 public class RNHTMLtoPDFModule extends ReactContextBaseJavaModule {
 
@@ -57,7 +58,7 @@ public class RNHTMLtoPDFModule extends ReactContextBaseJavaModule {
       convertToPDF(
         htmlString,
         destinationFile,
-        options.hasKey("base64") && options.getBoolean("base64") == true,
+        new PdfOptions(options),
         Arguments.createMap(),
         promise
       );
@@ -66,14 +67,14 @@ public class RNHTMLtoPDFModule extends ReactContextBaseJavaModule {
     }
   }
 
-  private void convertToPDF(String htmlString, File file, boolean shouldEncode, WritableMap resultMap, Promise promise) throws Exception {
+  private void convertToPDF(String htmlString, File file, PdfOptions options, WritableMap resultMap, Promise promise) throws Exception {
     try {
       PdfConverter.getInstance()
               .convert(
                 mReactContext,
                 htmlString,
                 file,
-                shouldEncode,
+                options,
                 resultMap,
                 promise
               );
